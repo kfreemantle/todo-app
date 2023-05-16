@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
 
 export const SettingsContext = React.createContext();
@@ -10,6 +10,12 @@ export const SettingsProvider = (props) => {
   
   // Define the list and related functions here
   const [list, setList] = useState([]);
+  const [incomplete, setIncomplete] = useState(0);
+
+  useEffect(() => {
+    let incompleteCount = list.filter(item => !item.complete).length;
+    setIncomplete(incompleteCount);
+  }, [list]);
 
   function addItem(item) {
     item.id = uuid();
@@ -33,7 +39,7 @@ export const SettingsProvider = (props) => {
   }
 
   return (
-    <SettingsContext.Provider value={{ showCompleted, setShowCompleted, itemsPerPage, setItemsPerPage, list, setList, addItem, deleteItem, toggleComplete }}>
+    <SettingsContext.Provider value={{ showCompleted, setShowCompleted, itemsPerPage, setItemsPerPage, list, setList, addItem, deleteItem, toggleComplete, incomplete }}>
       {props.children}
     </SettingsContext.Provider>
   );
