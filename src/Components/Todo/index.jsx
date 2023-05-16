@@ -3,7 +3,7 @@ import { SettingsContext } from '../../Context/Settings';
 import useForm from '../../hooks/form';
 
 const Todo = () => {
-  const { addItem, list } = useContext(SettingsContext);
+  const { addItem, list, toggleComplete } = useContext(SettingsContext);
   const [defaultValues] = useState({
     difficulty: 4,
   });
