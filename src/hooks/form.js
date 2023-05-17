@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useContext } from 'react';
+import { SettingsContext } from '../Context/Settings';
 
-const useForm = (callback, defaultValues={}) => {
-
-  const [values, setValues] = useState({});
+const useForm = (callback, defaultValues = {}) => {
+  const { values, setValues } = useContext(SettingsContext);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    callback({...values});
+    callback({ ...values });
+    event.target.reset();
   };
 
   const handleChange = (event) => {
     let name, value;
-    if(typeof(event) === 'object'){
+    if (typeof (event) === 'object') {
       name = event.target.name;
       value = event.target.value;
     } else {
@@ -30,9 +31,9 @@ const useForm = (callback, defaultValues={}) => {
     setValues(values => ({ ...values, [name]: value }));
   };
 
-  useEffect( () => {
-    setValues( defaultValues );
-  }, [defaultValues]);
+  useEffect(() => {
+    setValues(defaultValues);
+  }, [defaultValues, setValues]);
 
   return {
     handleChange,
