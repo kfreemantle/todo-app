@@ -1,46 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { v4 as uuid } from 'uuid';
+import React, { useState, useEffect } from "react";
 
 export const SettingsContext = React.createContext();
 
-export const SettingsProvider = (props) => {
-  // Define the settings you want to use throughout your app
-  const [showCompleted, setShowCompleted] = useState(true);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
-  
-  // Define the list and related functions here
-  const [list, setList] = useState([]);
-  const [incomplete, setIncomplete] = useState(0);
+const SettingProvider = ({ children }) => {
+  const [displayCount, setDisplayCount] = useState(3);
+  const [showComplete, setShowComplete] = useState(true);
+  const [sort, setSort] = useState('difficulty');
+
+  const saveLocally = () => {
+    localStorage.setItem('todo', JSON.stringify({ displayCount, showComplete, sort }));
+  };
 
   useEffect(() => {
-    let incompleteCount = list.filter(item => !item.complete).length;
-    setIncomplete(incompleteCount);
-  }, [list]);
+    const storage = JSON.parse(localStorage.getItem('todo'));
+    if (storage) {
+      setShowComplete(storage.showComplete);
+      setDisplayCount(storage.displayCount);
+      setSort(storage.sort);
+    }
+  }, []);
 
-  function addItem(item) {
-    item.id = uuid();
-    item.complete = false;
-    setList([...list, item]);
-  }
-
-  function deleteItem(id) {
-    const items = list.filter( item => item.id !== id );
-    setList(items);
-  }
-
-  function toggleComplete(id) {
-    const items = list.map( item => {
-      if ( item.id === id ) {
-        item.complete = ! item.complete;
-      }
-      return item;
-    });
-    setList(items);
-  }
+  const contextValue = {
+    showComplete,
+    setShowComplete,
+    displayCount,
+    setDisplayCount,
+    sort,
+    setSort,
+    saveLocally,
+  };
 
   return (
-    <SettingsContext.Provider value={{ showCompleted, setShowCompleted, itemsPerPage, setItemsPerPage, list, setList, addItem, deleteItem, toggleComplete, incomplete }}>
-      {props.children}
+    <SettingsContext.Provider value={contextValue}>
+      {children}
     </SettingsContext.Provider>
   );
 };
+
+export default SettingProvider;

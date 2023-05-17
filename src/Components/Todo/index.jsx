@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { SettingsContext } from '../../Context/Settings';
 import useForm from '../../hooks/form';
+import { Button, Input, Paper, Slider, Text, Grid } from '@mantine/core';
 
 const Todo = () => {
-  const { addItem, list, toggleComplete } = useContext(SettingsContext);
+  const { addItem, list } = useContext(SettingsContext);
   const [defaultValues] = useState({
     difficulty: 4,
   });
@@ -18,47 +19,48 @@ const Todo = () => {
   }, [list, incomplete]);  
 
   return (
-    <>
-      <header data-testid="todo-header">
-        <h1 data-testid="todo-h1">To Do List: {incomplete} items pending</h1>
-      </header>
+    <Grid.Container spacing="md">
+      <Grid.Row>
+        <Grid.Col span={12}>
+          <Text variant="h1" align="center">To Do List: {incomplete} items pending</Text>
+        </Grid.Col>
+      </Grid.Row>
 
-      <form onSubmit={handleSubmit}>
-        <h2>Add To Do Item</h2>
+      <Grid.Row>
+        <Grid.Col span={12}>
+          <Paper padding="md" shadow="xs">
+            <form onSubmit={handleSubmit}>
+              <Text variant="h2">Add To Do Item</Text>
 
-        <label>
-          <span>To Do Item</span>
-          <input onChange={handleChange} name="text" type="text" placeholder="Item Details" />
-        </label>
+              <Input 
+                label="To Do Item"
+                onChange={handleChange} 
+                name="text" 
+                placeholder="Item Details" 
+              />
 
-        <label>
-          <span>Assigned To</span>
-          <input onChange={handleChange} name="assignee" type="text" placeholder="Assignee Name" />
-        </label>
+              <Input 
+                label="Assigned To"
+                onChange={handleChange} 
+                name="assignee" 
+                placeholder="Assignee Name" 
+              />
 
-        <label>
-          <span>Difficulty</span>
-          <input onChange={handleChange} defaultValue={defaultValues.difficulty} type="range" min={1} max={5} name="difficulty" />
-        </label>
+              <Slider
+                label="Difficulty"
+                onChange={handleChange} 
+                defaultValue={defaultValues.difficulty} 
+                min={1} max={5} 
+                name="difficulty"
+              />
 
-        <label>
-          <button type="submit">Add Item</button>
-        </label>
-      </form>
-
-      {list.map(item => (
-        <div key={item.id}>
-          <p>{item.text}</p>
-          <p><small>Assigned to: {item.assignee}</small></p>
-          <p><small>Difficulty: {item.difficulty}</small></p>
-          <div onClick={() => toggleComplete(item.id)}>Complete: {item.complete.toString()}</div>
-          <hr />
-        </div>
-      ))}
-
-    </>
+              <Button type="submit" mt="md">Add Item</Button>
+            </form>
+          </Paper>
+        </Grid.Col>
+      </Grid.Row>
+    </Grid.Container>
   );
 };
-
 
 export default Todo;
