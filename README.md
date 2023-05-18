@@ -15,3 +15,24 @@ CRUD functionality for tasks.
 
 ![UML](./assets/lab31UML.png)
 
+ src
+   ├─ App.jsx
+   ├─ Components
+   │  ├─ Footer
+   │  │  └─ index.jsx
+   │  ├─ Header
+   │  │  └─ index.jsx
+   │  ├─ List
+   │  │  └─ index.jsx
+   │  ├─ SettingsForm
+   │  │  └─ index.js
+   │  └─ Todo
+   │     ├─ Todo.test.jsx
+   │     └─ index.jsx
+   ├─ Context
+   │  └─ Settings
+   │     └─ index.jsx
+   ├─ hooks
+   │  └─ form.js
+   └─ index.js
+
