@@ -1,83 +1,53 @@
-// Import necessary packages
-import React, { useState } from 'react';
-import testUsers from './lib/users';  // replace this with the correct path to your users.js file
-import jwt_decode from "jwt-decode";
+// Import axios for making API requests
+import axios from 'axios';
+import { createContext, useState } from 'react';
 
-// Create the AuthContext
-export const AuthContext = React.createContext();
+// API base URL
+const API_URL = 'https://api-js401.herokuapp.com';
 
-// AuthProvider is the Context Provider component for authentication
+export const AuthContext = createContext();
+
 const AuthProvider = ({ children }) => {
-  // useState Hooks are used to manage states for isLoggedIn, user
-  // error
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState({});
-  const [error, setError] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [token, setToken] = useState(null);
 
-  // function to check if user has a certain capability
-  const can = (capability) => {
-    return user?.capabilities?.includes(capability);
-  };
-
-  // function to validate the JWT token
-  const _validateToken = (token) => {
-    try{
-      // Decode the token
-      let validUser = jwt_decode(token);
-      console.log('validUser', validUser);
-
-      // If a validUser exists, set user to validUser and isLoggedIn to true
-      if (validUser){
-        setUser(validUser);
-        setIsLoggedIn(true);
-        console.log('I am logged in!');
-      }
-    }catch(e){
-      // If an error occurs, set error to the error and log it
-      setError(e);
-      console.log(e);
+  const login = async (username, password) => {
+    try {
+      // We will use a basic authentication schema, so we need to base64 encode the username and password
+      const encodedCredentials = btoa(`${username}:${password}`);
+      const response = await axios({
+        method: 'post',
+        url: `${API_URL}/signin`,
+        headers: { Authorization: `Basic ${encodedCredentials}` },
+      });
+      // Store the token in state
+      setToken(response.data.token);
+      // Mark the user as logged in
+      setLoggedIn(true);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  // function to log in the user
-  const login = (username, password) => {
-    // Find the user in the testUsers object
-    let user = testUsers[username];
-    
-    // If user exists and the password is correct, validate the token
-    if(user && user.password === password){
-      try {
-        _validateToken(user.token);
-      } catch(e){
-        setError(e);
-        console.log(e);
-      }
-    }
-  };
-
-  // function to log out the user
   const logout = () => {
-    // Clear the user object and set isLoggedIn to false
-    setUser({});
-    setIsLoggedIn(false);
-  };
-
-  // define the values that will be provided through AuthContext
-  const values = {
-    isLoggedIn,
-    user,
-    error,
-    login,
-    logout,
-    can,
+    // Remove the token from state
+    setToken(null);
+    // Mark the user as logged out
+    setLoggedIn(false);
   }
 
-  // Wrap children components with AuthContext.Provider
+  const contextValue = {
+    loggedIn,
+    setLoggedIn,
+    login,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={values}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 };
 
 export default AuthProvider;

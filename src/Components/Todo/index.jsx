@@ -1,65 +1,80 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { SettingsContext } from '../../Context/Settings';
+import React, { useEffect, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import useForm from '../../hooks/form';
-import { Button, Input, Paper, Slider, Text, Grid } from '@mantine/core';
+import { Button, Slider, Text, TextInput, Grid, Card, createStyles } from '@mantine/core';
+
+const useStyles = createStyles((theme) => ({
+  h1: {
+    backgroundColor: theme.colors.gray[8],
+    color: theme.colors.gray[0],
+    width: '80%',
+    margin: 'auto',
+    fontSize: theme.fontSizes.md,
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.md
+  }
+}));
 
 const Todo = () => {
-  const { addItem, list } = useContext(SettingsContext);
-  const [defaultValues] = useState({
-    difficulty: 4,
-  });
-
+  const { classes } = useStyles();
+  const [defaultValues] = useState({ difficulty: 4 });
+  const [list, setList] = useState([]);
   const [incomplete, setIncomplete] = useState([]);
   const { handleChange, handleSubmit } = useForm(addItem, defaultValues);
+
+  function addItem(item) {
+    item._id = uuid();
+    item.complete = false;
+    setList([...list, item]);
+  }
 
   useEffect(() => {
     let incompleteCount = list.filter(item => !item.complete).length;
     setIncomplete(incompleteCount);
     document.title = `To Do List: ${incomplete}`;
-  }, [list, incomplete]);  
+  }, [list]);
 
   return (
-    <Grid.Container spacing="md">
-      <Grid.Row>
-        <Grid.Col span={12}>
-          <Text variant="h1" align="center">To Do List: {incomplete} items pending</Text>
-        </Grid.Col>
-      </Grid.Row>
+    <>
+      <Text className={classes.h1}>To Do List: {incomplete} items pending</Text>
 
-      <Grid.Row>
+      <Grid style={{ width: '80%', margin: 'auto' }}>
         <Grid.Col span={12}>
-          <Paper padding="md" shadow="xs">
+          <Card withBorder>
             <form onSubmit={handleSubmit}>
-              <Text variant="h2">Add To Do Item</Text>
+              <Text>Add To Do Item</Text>
 
-              <Input 
+              <TextInput 
+                placeholder="Item Details"
                 label="To Do Item"
                 onChange={handleChange} 
                 name="text" 
-                placeholder="Item Details" 
               />
 
-              <Input 
+              <TextInput 
+                placeholder="Assignee Name"
                 label="Assigned To"
                 onChange={handleChange} 
                 name="assignee" 
-                placeholder="Assignee Name" 
               />
 
+              <Text>Difficulty</Text>
               <Slider
-                label="Difficulty"
                 onChange={handleChange} 
                 defaultValue={defaultValues.difficulty} 
-                min={1} max={5} 
+                min={1} 
+                max={5}
+                step={1} 
                 name="difficulty"
               />
 
               <Button type="submit" mt="md">Add Item</Button>
             </form>
-          </Paper>
+          </Card>
         </Grid.Col>
-      </Grid.Row>
-    </Grid.Container>
+      </Grid>
+    </>
   );
 };
 

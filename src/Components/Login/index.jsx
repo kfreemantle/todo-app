@@ -1,118 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { v4 as uuid } from 'uuid';
-import { Button, Card, Grid, Slider, Text, TextInput, createStyles } from '@mantine/core';
+import { useContext, useState } from 'react';
+import { If, Then, Else } from 'react-if';
+import { Button, Group, TextInput } from '@mantine/core';
+import { AuthContext } from '../../Context/Auth';
 
-import useForm from '../../hooks/form';
-import List from '../List';
+const Login = () => {
+  const { isLoggedIn, logout, login } = useContext(AuthContext);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-const useStyles = createStyles((theme) => ({
-  h1: {
-    backgroundColor: theme.colors.gray[8],
-    color: theme.colors.gray[0],
-    width: '80%',
-    margin: 'auto',
-    fontSize: theme.fontSizes.md,
-    padding: theme.spacing.md,
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.md
-  }
-}));
-
-const Todo = () => {
-
-  const { classes } = useStyles();
-  const [defaultValues] = useState({
-    difficulty: 4,
-  });
-  const [list, setList] = useState([]);
-  const [incomplete, setIncomplete] = useState([]);
-  const { handleChange, handleSubmit } = useForm(addItem, defaultValues);
-
-  function addItem(item) {
-    item.id = uuid();
-    item.complete = false;
-    console.log(item);
-    setList([...list, item]);
-  }
-
-  function deleteItem(id) {
-    const items = list.filter(item => item.id !== id);
-    setList(items);
-  }
-
-  function toggleComplete(id) {
-
-    const items = list.map(item => {
-      if (item.id === id) {
-        item.complete = !item.complete;
-      }
-      return item;
-    });
-
-    setList(items);
-  }
-
-  useEffect(() => {
-    let incompleteCount = list.filter(item => !item.complete).length;
-    setIncomplete(incompleteCount);
-    document.title = `To Do List: ${incomplete}`;
-    // linter will want 'incomplete' added to dependency array unnecessarily. 
-    // disable code used to avoid linter warning 
-    // eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, [list]);
+  const handleLogout = () => {
+    logout();
+    setUsername('');
+    setPassword('');
+  };
 
   return (
     <>
-      <header data-testid="todo-header">
-        <h1 className={classes.h1} data-testid="todo-h1">To Do List: {incomplete} items pending</h1>
-      </header>
-
-      <Grid style={{ width: '80%', margin: 'auto' }}>
-        
-        <Grid.Col xs={12} sm={4}>
-          <Card withBorder>
-            <form onSubmit={handleSubmit}>
-            
-              <h2>Add To Do Item</h2>
-              <TextInput
-                placeholder='Item Details'
-                label='To Do Item'
-                onChange={handleChange}
-                name="text"
-              />
-
-              <TextInput
-                placeholder='Assignee Name'
-                label='Assigned To'
-                onChange={handleChange}
-                name="assignee"
-              />
-
-              <Text>Difficulty</Text>
-              <Slider
-                onChange={handleChange}
-                defaultValue={defaultValues.difficulty}
-                min={1}
-                max={5}
-                step={1}
-              />
-
-              <Button mt="sm" type="submit">Add Item</Button>
-              
-            </form>
-          </Card>      
-        </Grid.Col>
-        
-        <Grid.Col xs={12} sm={8}>
-          <List
-            list={list}
-            toggleComplete={toggleComplete}
-            deleteItem={deleteItem}
-          />
-        </Grid.Col>
-      </Grid>
+      <If condition={isLoggedIn}>
+        <Then>
+          <Button color="red" onClick={handleLogout}>Log Out</Button>
+        </Then>
+        <Else>
+          <Group>
+            <TextInput
+              placeholder="Username"
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextInput
+              placeholder="Password"
+              type="password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button color="gray.8" onClick={() => login(username, password)}>Log In</Button>
+          </Group>
+        </Else>
+      </If>
     </>
   );
-};
+}
 
-export default Todo;
+export default Login;

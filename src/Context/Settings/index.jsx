@@ -2,32 +2,41 @@ import React, { useState, useEffect } from "react";
 
 export const SettingsContext = React.createContext();
 
-const SettingProvider = ({ children }) => {
-  const [displayCount, setDisplayCount] = useState(3);
-  const [showComplete, setShowComplete] = useState(true);
-  const [sort, setSort] = useState('difficulty');
+const SettingsProvider = ({ children }) => {
+  const [pageItems, setDisplayCount] = useState(3);
+  const [showCompleted, setShowCompleted] = useState(true);
+  const [sortField, setSortField] = useState('difficulty');
 
-  const saveLocally = () => {
-    localStorage.setItem('todo', JSON.stringify({ displayCount, showComplete, sort }));
+  const saveLocalStorage = () => {
+    localStorage.setItem('pageItems', JSON.stringify(pageItems));
+    localStorage.setItem('showCompleted', JSON.stringify(showCompleted));
+    localStorage.setItem('sortField', JSON.stringify(sortField));
   };
 
   useEffect(() => {
-    const storage = JSON.parse(localStorage.getItem('todo'));
-    if (storage) {
-      setShowComplete(storage.showComplete);
-      setDisplayCount(storage.displayCount);
-      setSort(storage.sort);
+    const localPageItems = localStorage.getItem('pageItems');
+    const localShowCompleted = localStorage.getItem('showCompleted');
+    const localSortField = localStorage.getItem('sortField');
+
+    if (localPageItems) {
+      setDisplayCount(JSON.parse(localPageItems));
+    }
+    if (localShowCompleted) {
+      setShowCompleted(JSON.parse(localShowCompleted));
+    }
+    if (localSortField) {
+      setSortField(JSON.parse(localSortField));
     }
   }, []);
 
   const contextValue = {
-    showComplete,
-    setShowComplete,
-    displayCount,
+    pageItems,
     setDisplayCount,
-    sort,
-    setSort,
-    saveLocally,
+    showCompleted,
+    setShowCompleted,
+    sortField,
+    setSortField,
+    saveLocalStorage,
   };
 
   return (
@@ -37,4 +46,4 @@ const SettingProvider = ({ children }) => {
   );
 };
 
-export default SettingProvider;
+export default SettingsProvider;
