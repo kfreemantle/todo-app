@@ -2,11 +2,14 @@
 import { useContext, useState, useEffect } from 'react';
 import { SettingsContext } from '../../Context/Settings';
 import { Pagination, Card, Text, Group, Badge, CloseButton } from '@mantine/core';
+import { AuthContext } from '../../Context/Auth'; // Import AuthContext
+import Auth from '../Auth'; // Import Auth component
 
 // Defining the List component
 const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and deleteItem as props
-  // Accessing required variables and functions from SettingsContext
+  // Accessing required variables and functions from SettingsContext and AuthContext
   const { list, itemsPerPage, showCompleted } = useContext(SettingsContext);
+  const { isLoggedIn, can } = useContext(AuthContext); // Add isLoggedIn and can
   
   // useState hook for managing the current page
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,7 +38,7 @@ const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and
   // Returning the List component
   return (
     <>
-      {displayItems.map(item => (
+      {isLoggedIn && displayItems.map(item => ( // Only display items when the user is logged in
         <Card withBorder shadow="md" key={item.id} mb="sm">
           <Card.Section withBorder>
             <Group position="apart">
@@ -50,14 +53,18 @@ const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and
                 </Badge>
                 <Text>{item.assignee}</Text>
               </Group>
-              <CloseButton
-                onClick={() => deleteItem(item.id)}
-                title="Close Todo Item"
-              />
+              <Auth capability="delete">
+                <CloseButton
+                  onClick={() => deleteItem(item.id)}
+                  title="Close Todo Item"
+                />
+              </Auth>
             </Group>
           </Card.Section>
           <Text mt="sm">{item.text}</Text>
-          <Text align="right">Difficulty: {item.difficulty}</Text>
+          <Auth capability="update">
+            <Text align="right">Difficulty: {item.difficulty}</Text>
+          </Auth>
         </Card>
       ))}
 
@@ -71,3 +78,4 @@ const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and
 }
 
 export default List;
+
