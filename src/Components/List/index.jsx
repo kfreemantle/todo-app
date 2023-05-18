@@ -1,73 +1,67 @@
-// Importing required hooks and components from React, Settings context, and Mantine
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { SettingsContext } from '../../Context/Settings';
-import { Pagination, Card, Text, Group, Badge, CloseButton } from '@mantine/core';
-import { AuthContext } from '../../Context/Auth'; // Import AuthContext
-import Auth from '../Auth'; // Import Auth component
+import { AuthContext } from '../../Context/Auth';
+import { Badge, Card, CloseButton, Group, Pagination, Text } from '@mantine/core';
+import { Else, If, Then } from 'react-if';
+import Auth from '../Auth';
 
-// Defining the List component
-const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and deleteItem as props
-  // Accessing required variables and functions from SettingsContext and AuthContext
-  const { list, itemsPerPage, showCompleted } = useContext(SettingsContext);
-  const { isLoggedIn, can } = useContext(AuthContext); // Add isLoggedIn and can
-  
-  // useState hook for managing the current page
+const List = ({ list, toggleComplete, deleteItem }) => {
+  const { pageItems, showCompleted } = useContext(SettingsContext);
+  const { isLoggedIn, can } = useContext(AuthContext);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // useEffect for handling page changes when the list changes
-  useEffect(() => {
-    const totalPages = Math.ceil(list.length / itemsPerPage);
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [list, itemsPerPage, currentPage]);
-
-  // Creating a filtered list based on the showCompleted value
-  const filteredList = showCompleted ? list : list.filter(item => !item.complete);
+  const totalPages = Math.ceil(list.length / pageItems);
   
-  // Finding the first and last items to display based on the current page
-  const firstItem = (currentPage - 1) * itemsPerPage;
-  const lastItem = currentPage * itemsPerPage;
-  
-  // Selecting the items to display from the filtered list
-  const displayItems = filteredList.slice(firstItem, lastItem);
+  const displayItems = showCompleted
+    ? list
+    : list.filter((item) => !item.complete);
 
-  // Calculating the total number of pages
-  const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+  const firstItem = (currentPage - 1) * pageItems;
+  const lastItem = currentPage * pageItems;
+  const displayList = displayItems.slice(firstItem, lastItem);
 
-  // Returning the List component
   return (
     <>
-      {isLoggedIn && displayItems.map(item => ( // Only display items when the user is logged in
-        <Card withBorder shadow="md" key={item.id} mb="sm">
+      {displayList.map((item, idx) => (
+        <Card withBorder shadow="md" key={item._id} mb="sm">
           <Card.Section withBorder>
             <Group position="apart">
               <Group>
-                <Badge
-                  onClick={() => toggleComplete(item.id)}
-                  color={item.complete ? 'red' : 'green'}
-                  variant="filled"
-                  m="3px"
-                >
-                  {item.complete ? 'Complete' : 'Pending'}
-                </Badge>
-                <Text>{item.assignee}</Text>
+                <If condition={isLoggedIn && can('update')}>
+                  <Then>
+                    <Badge
+                      onClick={() => toggleComplete(item._id)}
+                      color={item.complete ? 'red' : 'green'}
+                      variant="filled"
+                      m="3px"
+                    >
+                      {item.complete ? 'Complete' : 'Pending'}
+                    </Badge>
+                  </Then>
+                  <Else>
+                    <Badge
+                      color={item.complete ? 'red' : 'green'}
+                      variant="filled"
+                      m="3px"
+                    >
+                      {item.complete ? 'Complete' : 'Pending'}
+                    </Badge>
+                  </Else>
+                </If>
+                <Text data-testid={`item-assignee-${idx}`}>Assigned to: {item.assignee}</Text>
               </Group>
               <Auth capability="delete">
                 <CloseButton
-                  onClick={() => deleteItem(item.id)}
+                  onClick={() => deleteItem(item._id)}
                   title="Close Todo Item"
                 />
               </Auth>
             </Group>
           </Card.Section>
-          <Text mt="sm">{item.text}</Text>
-          <Auth capability="update">
-            <Text align="right">Difficulty: {item.difficulty}</Text>
-          </Auth>
+          <Text data-testid={`item-text-${idx}`} mt="sm">{item.text}</Text>
+          <Text data-testid={`item-difficulty-${idx}`} align="right">Difficulty: {item.difficulty}</Text>
         </Card>
       ))}
-
       <Pagination
         total={totalPages}
         value={currentPage}
@@ -78,4 +72,3 @@ const List = ({ toggleComplete, deleteItem }) => {  // Adding toggleComplete and
 }
 
 export default List;
-
